@@ -1,0 +1,10 @@
+﻿<Application x:Class="EktoplazmExtractor.App"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:local="clr-namespace:EktoplazmExtractor"
+             xmlns:vm="clr-namespace:EktoplazmExtractor.ViewModels"
+             StartupUri="MainWindow.xaml">
+    <Application.Resources>
+        <vm:ViewModelLocator x:Key="ViewModelLocator" />
+    </Application.Resources>
+</Application>
