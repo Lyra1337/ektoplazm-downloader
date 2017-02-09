@@ -13,6 +13,7 @@ namespace EktoplazmExtractor.ViewModels
             ServiceLocator.SetLocatorProvider(() => SimpleIoc.Default);
 
             SimpleIoc.Default.Register<HttpTransmissionService>();
+            SimpleIoc.Default.Register<EktoplazmParserService>();
 
             this.MainWindowVM = new MainWindowViewModel();
         }
