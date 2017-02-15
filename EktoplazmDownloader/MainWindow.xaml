@@ -37,8 +37,8 @@
                     <DataTemplate DataType="{x:Type services:Transfer}">
                         <TextBlock>
                             <Run Text="{Binding Album.Name, Mode=OneWay}" />
-                            <Run Text=" " />
                             <Run Text="{Binding State}" />
+                            <Run Text="{Binding Progress, StringFormat=P1}" />
                         </TextBlock>
                     </DataTemplate>
                 </ItemsControl.ItemTemplate>

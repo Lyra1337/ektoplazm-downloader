@@ -56,7 +56,7 @@ namespace EktoplazmExtractor.Services
                         semaphore.Wait();
 
                         WebClient client = new WebClient();
-                        
+
                         client.DownloadProgressChanged += this.Client_DownloadProgressChanged;
                         client.DownloadFileCompleted += (s, e) =>
                         {
@@ -90,7 +90,7 @@ namespace EktoplazmExtractor.Services
         {
             var transfer = (Transfer)e.UserState;
 
-            transfer.Progress = e.TotalBytesToReceive / Convert.ToSingle(e.BytesReceived);
+            transfer.Progress = e.BytesReceived / Convert.ToSingle(e.TotalBytesToReceive);
             transfer.State = TransferState.Tranferring;
         }
     }
