@@ -14,6 +14,7 @@ namespace EktoplazmExtractor.ViewModels
 
             SimpleIoc.Default.Register<HttpTransmissionService>();
             SimpleIoc.Default.Register<EktoplazmParserService>();
+            SimpleIoc.Default.Register<CompressionService>();
 
             this.MainWindowVM = new MainWindowViewModel();
         }

@@ -5,7 +5,9 @@
         None,
         Waiting,
         Started,
-        Completed,
-        Error
+        Tranferring,
+        DownloadCompleted,
+        Error,
+        Finished
     }
 }

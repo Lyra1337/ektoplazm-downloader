@@ -1,55 +1,97 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
+using System.Linq;
 using System.Net;
+using System.Threading;
+using Microsoft.Practices.ServiceLocation;
 
 namespace EktoplazmExtractor.Services
 {
     internal class HttpTransmissionService
     {
         private readonly Queue<Transfer> transferQueue = new Queue<Transfer>();
+        private Thread workerThread = null;
+        private bool isRunning = false;
 
-        public HttpTransmissionService()
+        public Transfer Enqueue(string remoteUrl, string localPath, Album album)
         {
-
-        }
-
-        public Transfer Enqueue(string remoteUrl, string localPath)
-        {
-            var transfer = new Transfer(remoteUrl, localPath);
+            var transfer = new Transfer(remoteUrl, localPath, album);
 
             this.transferQueue.Enqueue(transfer);
 
             return transfer;
         }
 
+        public void Start()
+        {
+            if (this.isRunning == true)
+            {
+                throw new Exception("already running");
+            }
+
+            this.isRunning = true;
+
+            this.workerThread = new Thread(this.TransferWorker);
+            this.workerThread.Start();
+        }
+
+        internal void Stop()
+        {
+            this.isRunning = false;
+        }
+
         private void TransferWorker()
         {
-            while (true)
+            SemaphoreSlim semaphore = new SemaphoreSlim(4, 4);
+
+            while (this.isRunning == true)
             {
-                var currentTransfer = this.transferQueue.Dequeue();
-
-                try
+                if (this.transferQueue.Any() == true && semaphore.CurrentCount > 0)
                 {
-                    WebClient client = new WebClient();
+                    try
+                    {
+                        var currentTransfer = this.transferQueue.Dequeue();
 
-                    client.DownloadFileAsync(new Uri(currentTransfer.RemoteUrl), currentTransfer.LocalPath + "test.zip", currentTransfer);
+                        semaphore.Wait();
 
-                    //client.DownloadProgressChanged += (sender, e) => currentTransfer.Progress = (float)(e.TotalBytesToReceive / (double)e.BytesReceived);
-                    client.DownloadProgressChanged += this.Client_DownloadProgressChanged;
+                        WebClient client = new WebClient();
+                        
+                        client.DownloadProgressChanged += this.Client_DownloadProgressChanged;
+                        client.DownloadFileCompleted += (s, e) =>
+                        {
+                            semaphore.Release();
+                            this.Client_DownloadFileCompleted(s, e);
+                        };
+
+                        client.DownloadFileAsync(new Uri(currentTransfer.RemoteUrl), currentTransfer.LocalPath, currentTransfer);
+
+                        currentTransfer.State = TransferState.Started;
+                    }
+                    catch (Exception)
+                    {
+                        // TODO
+                        //this.transferQueue.Enqueue(currentTransfer);
+                    }
                 }
-                catch (Exception)
-                {
-                    //this.transferQueue.Enqueue(currentTransfer);
-                }
+
+                Thread.Sleep(100);
             }
+        }
+
+        private void Client_DownloadFileCompleted(object sender, AsyncCompletedEventArgs e)
+        {
+            var transfer = (Transfer)e.UserState;
+
+            transfer.State = TransferState.DownloadCompleted;
         }
 
         private void Client_DownloadProgressChanged(object sender, DownloadProgressChangedEventArgs e)
         {
             var transfer = (Transfer)e.UserState;
 
-            transfer.Progress = (float)(e.TotalBytesToReceive / (double)e.BytesReceived);
-            transfer.State = e.ProgressPercentage == 100 ? TransferState.Completed : TransferState.Started;
+            transfer.Progress = e.TotalBytesToReceive / Convert.ToSingle(e.BytesReceived);
+            transfer.State = TransferState.Tranferring;
         }
     }
 }

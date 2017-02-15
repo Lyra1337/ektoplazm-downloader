@@ -4,6 +4,8 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:EktoplazmExtractor"
+        xmlns:vm="clr-namespace:EktoplazmExtractor.ViewModels"
+        xmlns:services="clr-namespace:EktoplazmExtractor.Services"
         xmlns:controls="clr-namespace:EktoplazmExtractor.Controls"
         mc:Ignorable="d"
         Title="{Binding WindowTitle}" Height="350" Width="525"
@@ -11,7 +13,9 @@
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
         <Grid.ColumnDefinitions>
@@ -21,14 +25,33 @@
 
         <controls:LabeledTextBox Grid.Column="0" Grid.Row="0" Caption="Url" Text="{Binding Url}" />
 
-        <Button Grid.Column="1" Grid.Row="0" Command="{Binding StartDownloadCommand}" />
+        <Button Grid.Column="1" Grid.Row="0" Content="Find Downloads" Command="{Binding FindDownloadsCommand}" Margin="5 25 5 5" />
 
-        <ItemsControl Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="1" ItemsSource="{Binding Transfers}">
-            <ItemsControl.ItemTemplate>
-                <DataTemplate>
-                    
-                </DataTemplate>
-            </ItemsControl.ItemTemplate>
-        </ItemsControl>
+        <controls:LabeledTextBox Grid.Column="0" Grid.Row="1" Caption="Local Path" Text="{Binding LocalFolder}" />
+
+        <Button Grid.Column="1" Grid.Row="1" Content="Choose Folder" Command="{Binding ChooseDestinationFolderCommand}" Margin="5 25 5 5" />
+
+        <ScrollViewer Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="2">
+            <ItemsControl ItemsSource="{Binding Transfers}">
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate DataType="{x:Type services:Transfer}">
+                        <TextBlock>
+                            <Run Text="{Binding Album.Name, Mode=OneWay}" />
+                            <Run Text=" " />
+                            <Run Text="{Binding State}" />
+                        </TextBlock>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <StackPanel Orientation="Vertical" />
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+            </ItemsControl>
+        </ScrollViewer>
+
+        <ComboBox Grid.Column="0" Grid.Row="3" ItemsSource="{Binding DownloadTypes}" DisplayMemberPath="DisplayName" SelectedValue="{Binding CurrentDownloadType}" Margin="5" />
+
+        <Button Grid.Column="1" Grid.Row="3" Command="{Binding StartDownloadCommand}" Content="Start Downloads" Margin="5" />
     </Grid>
 </Window>

@@ -1,4 +1,5 @@
-﻿using GalaSoft.MvvmLight;
+﻿using System;
+using GalaSoft.MvvmLight;
 
 namespace EktoplazmExtractor.Services
 {
@@ -17,8 +18,11 @@ namespace EktoplazmExtractor.Services
             }
             set
             {
-                this.state = value;
-                this.RaisePropertyChanged();
+                if (this.state != value)
+                {
+                    this.state = value;
+                    this.RaisePropertyChanged();
+                }
             }
         }
 
@@ -36,10 +40,13 @@ namespace EktoplazmExtractor.Services
             }
         }
 
-        public Transfer(System.String remoteUrl, System.String localPath)
+        public Album Album { get; }
+
+        public Transfer(string remoteUrl, string localPath, Album album)
         {
             this.RemoteUrl = remoteUrl;
             this.LocalPath = localPath;
+            this.Album = album;
         }
     }
 }

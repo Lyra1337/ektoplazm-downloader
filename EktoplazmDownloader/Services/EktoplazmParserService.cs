@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net;
 using System.Net.Http;
-using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using HtmlAgilityPack;
@@ -18,11 +16,7 @@ namespace EktoplazmExtractor.Services
         public async Task<List<Album>> ParseAlbums(string url)
         {
             int? pageNumber = this.FindPageNumber(url);
-            if (pageNumber == null)
-            {
-                pageNumber = 1;
-            }
-            
+
             HttpClient client = new HttpClient();
             HtmlDocument document = new HtmlDocument();
 
@@ -48,14 +42,17 @@ namespace EktoplazmExtractor.Services
                         url: titleNode.GetAttributeValue("href", String.Empty),
                         downloads: node
                             .SelectNodes(".//span[@class='dll']/a[@href]")
-                            .ToDictionary(x => x.InnerText, x => x.GetAttributeValue("href", String.Empty))
+                            .ToDictionary(x => x.InnerText.Replace("Download", String.Empty).Trim(), x => x.GetAttributeValue("href", String.Empty))
                     );
                 });
 
+#if DEBUG_SINGLE_PAGE
+#else
             if (result.Any() == true)
             {
-                result = result.Concat(await this.ParseAlbums(this.SetPageNumber(url, ((int)pageNumber) + 1)));
+                result = result.Concat(await this.ParseAlbums(this.SetPageNumber(url, (pageNumber ?? 1) + 1)));
             }
+#endif
 
             return result.ToList();
         }
