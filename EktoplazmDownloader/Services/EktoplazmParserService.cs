@@ -10,7 +10,6 @@ namespace EktoplazmExtractor.Services
 {
     internal sealed class EktoplazmParserService
     {
-        //private readonly Regex downloadLinkMatcher = new Regex("<a href=\"(?<url>(http://www\\.ektoplazm\\.com/files/[^\"]+))\">(?<type>([^>]+)) Download</a>", RegexOptions.Compiled);
         private readonly Regex pageNumberParser = new Regex("^(?<url>(https?://(www\\.)?ektoplazm.com/.+?/page/))(?<page>([0-9]+))$", RegexOptions.Compiled);
 
         public async Task<List<Album>> ParseAlbums(string url)

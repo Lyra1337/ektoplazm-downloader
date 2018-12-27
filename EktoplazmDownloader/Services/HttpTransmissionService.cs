@@ -4,7 +4,6 @@ using System.ComponentModel;
 using System.Linq;
 using System.Net;
 using System.Threading;
-using Microsoft.Practices.ServiceLocation;
 
 namespace EktoplazmExtractor.Services
 {
