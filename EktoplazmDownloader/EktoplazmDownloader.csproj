@@ -93,6 +93,7 @@
     <Compile Include="Controls\LabeledTextBox.xaml.cs">
       <DependentUpon>LabeledTextBox.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Converters\BooleanInverter.cs" />
     <Compile Include="Services\Album.cs" />
     <Compile Include="Services\CompressionService.cs" />
     <Compile Include="Services\EktoplazmParserService.cs" />

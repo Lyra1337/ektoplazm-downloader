@@ -14,10 +14,11 @@ namespace EktoplazmExtractor.Services
 
         public async Task<List<Album>> ParseAlbums(string url)
         {
+            System.Diagnostics.Debug.WriteLine(url);
             int? pageNumber = this.FindPageNumber(url);
 
-            HttpClient client = new HttpClient();
-            HtmlDocument document = new HtmlDocument();
+            var client = new HttpClient();
+            var document = new HtmlDocument();
 
             try
             {
@@ -59,9 +60,8 @@ namespace EktoplazmExtractor.Services
         private int? FindPageNumber(string url)
         {
             var match = this.pageNumberParser.Match(url);
-            int result = 0;
 
-            if (match.Success == true && Int32.TryParse(match.Groups["page"].Value, out result) == true)
+            if (match.Success == true && Int32.TryParse(match.Groups["page"].Value, out int result) == true)
             {
                 return result;
             }

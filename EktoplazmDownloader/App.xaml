@@ -3,8 +3,10 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:local="clr-namespace:EktoplazmExtractor"
              xmlns:vm="clr-namespace:EktoplazmExtractor.ViewModels"
+             xmlns:converters="clr-namespace:EktoplazmExtractor.Converters"
              StartupUri="MainWindow.xaml">
     <Application.Resources>
         <vm:ViewModelLocator x:Key="ViewModelLocator" />
+        <converters:BooleanInverter x:Key="BooleanInverter" />
     </Application.Resources>
 </Application>

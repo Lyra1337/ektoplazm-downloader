@@ -1,16 +1,17 @@
 ﻿using System;
-using System.Windows;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.IO;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Threading;
-using WinForms = System.Windows.Forms;
+using System.Windows;
 using EktoplazmExtractor.Services;
 using GalaSoft.MvvmLight;
 using GalaSoft.MvvmLight.Command;
 using Microsoft.Practices.ServiceLocation;
+using WinForms = System.Windows.Forms;
 
 namespace EktoplazmExtractor.ViewModels
 {
@@ -60,6 +61,13 @@ namespace EktoplazmExtractor.ViewModels
             }
         }
 
+        private bool isLoading = false;
+        public bool IsLoading
+        {
+            get => this.isLoading;
+            set => this.Set(ref this.isLoading, value);
+        }
+
         public ObservableCollection<Transfer> Transfers { get; } = new ObservableCollection<Transfer>();
         public ObservableCollection<Album> AvailableDownloads { get; } = new ObservableCollection<Album>();
         public ObservableCollection<DownloadType> DownloadTypes { get; } = new ObservableCollection<DownloadType>();
@@ -68,9 +76,9 @@ namespace EktoplazmExtractor.ViewModels
         public RelayCommand ChooseDestinationFolderCommand { get; }
         public RelayCommand StartDownloadCommand { get; }
 
-        private HttpTransmissionService httpTransmissionService = ServiceLocator.Current.GetInstance<HttpTransmissionService>();
-        private EktoplazmParserService ektoplazmParserService = ServiceLocator.Current.GetInstance<EktoplazmParserService>();
-        private CompressionService compressionService = ServiceLocator.Current.GetInstance<CompressionService>();
+        private readonly HttpTransmissionService httpTransmissionService = ServiceLocator.Current.GetInstance<HttpTransmissionService>();
+        private readonly EktoplazmParserService ektoplazmParserService = ServiceLocator.Current.GetInstance<EktoplazmParserService>();
+        private readonly CompressionService compressionService = ServiceLocator.Current.GetInstance<CompressionService>();
 
         public MainWindowViewModel()
         {
@@ -116,9 +124,11 @@ namespace EktoplazmExtractor.ViewModels
 
         private String GetFilePath(Album album)
         {
-            var name = album.Name;
-            Path.GetInvalidFileNameChars().ToList().ForEach(x => name.Replace(x, '_').Replace("__", "_"));
-            return String.Concat(this.LocalFolder, name);
+            string invalidChars = Regex.Escape(new String(Path.GetInvalidFileNameChars()));
+            string invalidRegStr = $@"([{invalidChars}]*\.+$)|([{invalidChars}]+)";
+
+            var validName = Regex.Replace(album.Name, invalidRegStr, "_");
+            return String.Concat(this.LocalFolder, validName);
         }
 
         private void ChooseDestinationFolderAction()
@@ -148,23 +158,31 @@ namespace EktoplazmExtractor.ViewModels
 
         private async void FindDownloadsAction()
         {
-            this.AvailableDownloads.Clear();
-            this.DownloadTypes.Clear();
-            this.CurrentDownloadType = null;
+            try
+            {
+                this.IsLoading = true;
+                this.AvailableDownloads.Clear();
+                this.DownloadTypes.Clear();
+                this.CurrentDownloadType = null;
 
-            (await this.ektoplazmParserService.ParseAlbums(this.Url)).ForEach(this.AvailableDownloads.Add);
+                (await this.ektoplazmParserService.ParseAlbums(this.Url)).ForEach(this.AvailableDownloads.Add);
 
-            this.AvailableDownloads
-                .SelectMany(x => x.Downloads)
-                .GroupBy(
-                    keySelector: x => x.Key,
-                    elementSelector: x => x.Key,
-                    resultSelector: (x, y) => new DownloadType(x, y.Count())
-                )
-                .ToList()
-                .ForEach(this.DownloadTypes.Add);
+                this.AvailableDownloads
+                    .SelectMany(x => x.Downloads)
+                    .GroupBy(
+                        keySelector: x => x.Key,
+                        elementSelector: x => x.Key,
+                        resultSelector: (x, y) => new DownloadType(x, y.Count())
+                    )
+                    .ToList()
+                    .ForEach(this.DownloadTypes.Add);
 
-            this.CurrentDownloadType = this.DownloadTypes.OrderByDescending(x => x.Count).FirstOrDefault();
+                this.CurrentDownloadType = this.DownloadTypes.OrderByDescending(x => x.Count).FirstOrDefault();
+            }
+            finally
+            {
+                this.IsLoading = false;
+            }
         }
     }
 }

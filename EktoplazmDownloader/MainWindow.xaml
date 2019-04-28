@@ -3,12 +3,11 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:EktoplazmExtractor"
-        xmlns:vm="clr-namespace:EktoplazmExtractor.ViewModels"
         xmlns:services="clr-namespace:EktoplazmExtractor.Services"
         xmlns:controls="clr-namespace:EktoplazmExtractor.Controls"
         mc:Ignorable="d"
         Title="{Binding WindowTitle}" Height="350" Width="525"
+        IsEnabled="{Binding IsLoading, Converter={StaticResource BooleanInverter}}"
         DataContext="{Binding Source={StaticResource ViewModelLocator}, Path=MainWindowVM}">
     <Grid>
         <Grid.RowDefinitions>

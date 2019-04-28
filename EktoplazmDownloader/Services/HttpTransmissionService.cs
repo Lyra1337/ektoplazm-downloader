@@ -42,7 +42,7 @@ namespace EktoplazmExtractor.Services
 
         private void TransferWorker()
         {
-            SemaphoreSlim semaphore = new SemaphoreSlim(4, 4);
+            var semaphore = new SemaphoreSlim(3, 3);
 
             while (this.isRunning == true)
             {
@@ -54,7 +54,7 @@ namespace EktoplazmExtractor.Services
 
                         semaphore.Wait();
 
-                        WebClient client = new WebClient();
+                        var client = new WebClient();
 
                         client.DownloadProgressChanged += this.Client_DownloadProgressChanged;
                         client.DownloadFileCompleted += (s, e) =>
